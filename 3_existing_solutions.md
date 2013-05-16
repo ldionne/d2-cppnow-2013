@@ -2,27 +2,27 @@
 # Existing solutions
 
 
-<!SLIDE smbullets incremental>
+<!SLIDE smbullets>
 ## Never hold more than one lock at once
 
 * Not realistic for non-trivial programs
 
 
-<!SLIDE smbullets incremental>
+<!SLIDE smbullets>
 ## Determine a hierarchy among locks and respect it
 
 * Error-prone
 * Not realistic for non-trivial programs
 
 
-<!SLIDE smbullets incremental>
+<!SLIDE smbullets>
 ## Disturb thread scheduling to provoke hidden deadlocks
 
 * Requires several runs of the program
 * Good idea that could be mixed with other approaches
 
 
-<!SLIDE smbullets incremental>
+<!SLIDE smbullets>
 ## Use an algorithm to break deadlocks when they happen
 
 * Overhead required to check for deadlock conditions
@@ -30,7 +30,7 @@
 * Misses the point: deadlocks are a bug, not a runtime mishap
 
 
-<!SLIDE smbullets incremental>
+<!SLIDE smbullets>
 ## Intel® Inspector XE
 
 * Detects deadlocks involving up to 4 threads only
@@ -39,7 +39,7 @@
 * Exact capabilities for deadlock detection unknown
 
 
-<!SLIDE smbullets incremental>
+<!SLIDE smbullets>
 ## Valgrind (Helgrind)
 
 * Runs the program on a virtual processor, one thread at a time

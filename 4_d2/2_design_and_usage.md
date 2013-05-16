@@ -2,33 +2,33 @@
 # Design and usage
 
 
-<!SLIDE bullets incremental>
+<!SLIDE smbullets>
 ## `d2` needs to record 4 types of events
 
-* Lock acquire and release
-* Thread start and join
+* Lock acquires and releases
+* Thread starts and joins
 
 
-<!SLIDE>
+<!SLIDE centered-code>
 ## High level API with concepts from Boost.Thread
 
     @@@ cpp
-        boost::BasicLockable
-        boost::Lockable
-        boost::TimedLockable
+    boost::BasicLockable
+    boost::Lockable
+    boost::TimedLockable
 
 
 <!SLIDE>
 ## Simply wrap your class with the corresponding wrapper
 
     @@@ cpp
-        class untracked_mutex {
-        public:
-          void lock();
-          void unlock();
-        };
+    class untracked_mutex {
+    public:
+      void lock();
+      void unlock();
+    };
 
-        typedef d2::basic_lockable<untracked_mutex> mutex;
+    typedef d2::basic_lockable<untracked_mutex> mutex;
 
 
 <!SLIDE skip>
@@ -37,159 +37,161 @@
 ## You can also use a mixin to achieve the same effect
 
     @@@ cpp
-        class mutex : d2::basic_lockable_mixin<mutex> {
-          friend class d2::access;
-          void lock_impl();
-          void unlock_impl();
-        };
+    class mutex : d2::basic_lockable_mixin<mutex> {
+      friend class d2::access;
+      void lock_impl();
+      void unlock_impl();
+    };
 
 
-<!SLIDE>
+<!SLIDE centered-code>
 ## All wrappers have a recursive counterpart
 
     @@@ cpp
-        d2::recursive_basic_lockable
-        d2::recursive_lockable
-        d2::recursive_timed_lockable
+    d2::recursive_basic_lockable
+    d2::recursive_lockable
+    d2::recursive_timed_lockable
 
 
 <!SLIDE>
 ## You can also bypass the concept based API
 
     @@@ cpp
-        class mutex : d2::trackable_sync_object<d2::non_recursive> {
-        public:
-          void some_method_to_lock() {
-            // normal code
-            this->notify_lock();
-          }
+    class mutex
+      : d2::trackable_sync_object<d2::non_recursive>
+    {
+    public:
+      void some_method_to_lock() {
+        // normal code
+        this->notify_lock();
+      }
 
-          void some_method_to_unlock() {
-            // normal code
-            this->notify_unlock();
-          }
-        };
+      void some_method_to_unlock() {
+        // normal code
+        this->notify_unlock();
+      }
+    };
 
 
 <!SLIDE>
 ## Tracking standard conforming threads is easy
 
     @@@ cpp
-        class untracked_thread {
-          // ...
-        };
+    class untracked_thread {
+      // ...
+    };
 
-        typedef d2::standard_thread<untracked_thread> thread;
+    typedef d2::standard_thread<untracked_thread> thread;
 
 
 <!SLIDE skip>
 ## A mixin is also available
 
     @@@ cpp
-        class thread : public d2::standard_thread_mixin<thread> {
-          friend class d2::access;
-          void detach_impl();
-          void join_impl();
-        };
+    class thread : public d2::standard_thread_mixin<thread> {
+      friend class d2::access;
+      void detach_impl();
+      void join_impl();
+    };
 
 
 <!SLIDE skip>
 ## When using the mixin, the constructor has to be tweaked
 
     @@@ cpp
-        template <typename F, typename ...Args>
-        explicit thread(F&& f, Args&& ...args) {
-          typedef d2::thread_function<F> F_;
-          F_ f_ = this->get_thread_function(
-                          boost::forward<F>(f));
+    template <typename F, typename ...Args>
+    explicit thread(F&& f, Args&& ...args) {
+      typedef d2::thread_function<F> F_;
+      F_ f_ = this->get_thread_function(
+                      boost::forward<F>(f));
 
-          // normal code using F_ and f_
-        }
+      // normal code using F_ and f_
+    }
 
 
 <!SLIDE skip>
 ## Don't forget to modify these or you'll be sorry
 
     @@@ cpp
-        thread(thread&& other)
-          : standard_thread_mixin_(boost::move(other))
-        { }
+    thread(thread&& other)
+      : standard_thread_mixin_(boost::move(other))
+    { }
 
-        thread& operator=(thread&& other) {
-          standard_thread_mixin_::operator=(boost::move(other));
-          // ...
-        }
+    thread& operator=(thread&& other) {
+      standard_thread_mixin_::operator=(boost::move(other));
+      // ...
+    }
 
-        friend void swap(thread& a, thread& b) {
-          swap(static_cast<standard_thread_mixin_&>(a),
-               static_cast<standard_thread_mixin_&>(b));
-          // ...
-        }
-
-
-<!SLIDE>
-## Tracking non standard thread implementations is possible too
-
-    @@@ cpp
-        class thread : d2::trackable_thread<thread> {
-        public:
-          template <typename F, typename ...Args>
-          void some_method_to_start(F&& f, Args&& ...args) {
-            typedef d2::thread_function<F> F_;
-            F_ f_ = this->get_thread_function(f);
-            // normal code using F_ and f_
-          }
-        };
+    friend void swap(thread& a, thread& b) {
+      swap(static_cast<standard_thread_mixin_&>(a),
+           static_cast<standard_thread_mixin_&>(b));
+      // ...
+    }
 
 
 <!SLIDE>
 ## Tracking non standard thread implementations is possible too
 
     @@@ cpp
-        class thread : d2::trackable_thread<thread> {
-        public:
-          void some_method_to_join() {
-            // normal code
-            this->notify_join();
-          }
-        };
+    class thread : d2::trackable_thread<thread> {
+    public:
+      template <typename F, typename ...Args>
+      void some_method_to_start(F&& f, Args&& ...args) {
+        typedef d2::thread_function<F> F_;
+        F_ f_ = this->get_thread_function(f);
+        // normal code using F_ and f_
+      }
+    };
 
 
 <!SLIDE>
 ## Tracking non standard thread implementations is possible too
 
     @@@ cpp
-        class thread : d2::trackable_thread<thread> {
-        public:
-          void some_method_to_detach() {
-            // normal code
-            this->notify_detach();
-          }
-        };
+    class thread : d2::trackable_thread<thread> {
+    public:
+      void some_method_to_join() {
+        // normal code
+        this->notify_join();
+      }
+    };
 
 
 <!SLIDE>
+## Tracking non standard thread implementations is possible too
+
+    @@@ cpp
+    class thread : d2::trackable_thread<thread> {
+    public:
+      void some_method_to_detach() {
+        // normal code
+        this->notify_detach();
+      }
+    };
+
+
+<!SLIDE centered-code>
 ## Don't forget to modify these
 
     @@@ cpp
-        thread(thread&& other);
-        thread& operator=(thread&& other);
-        friend void swap(thread& a, thread& b);
+    thread(thread&& other);
+    thread& operator=(thread&& other);
+    friend void swap(thread& a, thread& b);
 
 
-<!SLIDE>
+<!SLIDE centered-code>
 ## Low level C API (for eventual bindings)
 
     @@@ c
-        d2_notify_acquire(thread, lock)
-        d2_notify_release(thread, lock)
-        d2_notify_recursive_acquire(thread, lock)
-        d2_notify_recursive_release(thread, lock)
-        d2_notify_start(parent, child)
-        d2_notify_join(parent, child)
+    d2_notify_acquire(thread, lock)
+    d2_notify_release(thread, lock)
+    d2_notify_recursive_acquire(thread, lock)
+    d2_notify_recursive_release(thread, lock)
+    d2_notify_start(parent, child)
+    d2_notify_join(parent, child)
 
 
-<!SLIDE>
+<!SLIDE #slide-filesystem>
 ## Events are generated and dispatched to the filesystem
 
 ![Example repository](example_repository.png)
@@ -246,7 +248,7 @@ Also mention that this output was cropped and edited a bit for clarity.
     [...]/libsystem_c.dylib        thread_start
 
 
-<!SLIDE bullets incremental>
+<!SLIDE smbullets>
 ## Current limitations:
 
 * Output is not as nicely formatted

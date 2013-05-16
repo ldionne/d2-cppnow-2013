@@ -32,7 +32,7 @@ in parallel.
 `main` starts in segment 0
 
     @@@ cpp
-        // ...
+    // ...
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, splines = ortho];
@@ -49,8 +49,8 @@ in parallel.
 
 
     @@@ cpp
-        thread t1([] {});
-        // ...
+    thread t1([] {});
+    // ...
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, splines = ortho];
@@ -73,11 +73,11 @@ in parallel.
 `main` starts `t2`; `main` and `t2` get new segments
 
     @@@ cpp
-        thread t1([] {});
-        thread t2([] {
-            // ...
-        });
+    thread t1([] {});
+    thread t2([] {
         // ...
+    });
+    // ...
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, splines = ortho];
@@ -106,12 +106,12 @@ in parallel.
 `t2` starts `t3`; `t2` and `t3` get new segments
 
     @@@ cpp
-        thread t1([] {});
-        thread t2([] {
-            thread t3([] {});
-            // ...
-        });
+    thread t1([] {});
+    thread t2([] {
+        thread t3([] {});
         // ...
+    });
+    // ...
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, splines = ortho];
@@ -146,12 +146,12 @@ in parallel.
 `t2` joins `t3`; `t2` continues in a new segment
 
     @@@ cpp
-        thread t1([] {});
-        thread t2([] {
-            thread t3([] {});
-            t3.join();
-        });
-        // ...
+    thread t1([] {});
+    thread t2([] {
+        thread t3([] {});
+        t3.join();
+    });
+    // ...
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, splines = ortho];
@@ -187,13 +187,13 @@ in parallel.
 `main` joins `t1`; `main` continues in a new segment
 
     @@@ cpp
-        thread t1([] {});
-        thread t2([] {
-            thread t3([] {});
-            t3.join();
-        });
-        t1.join();
-        // ...
+    thread t1([] {});
+    thread t2([] {
+        thread t3([] {});
+        t3.join();
+    });
+    t1.join();
+    // ...
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, splines = ortho];
@@ -230,13 +230,13 @@ in parallel.
 `main` joins `t2`; `main` continues in a new segment
 
     @@@ cpp
-        thread t1([] {});
-        thread t2([] {
-            thread t3([] {});
-            t3.join();
-        });
-        t1.join();
-        t2.join();
+    thread t1([] {});
+    thread t2([] {
+        thread t3([] {});
+        t3.join();
+    });
+    t1.join();
+    t2.join();
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, splines = ortho];

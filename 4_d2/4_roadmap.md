@@ -1,4 +1,4 @@
-<!SLIDE smbullets incremental>
+<!SLIDE smbullets>
 # Limitations and drawbacks
 
 * Requires modifying existing code
@@ -6,7 +6,7 @@
 * Current implementation is immature
 
 
-<!SLIDE smbullets incremental>
+<!SLIDE smbullets>
 # Roadmap
 * Support a wider set of synchronization primitives
 * Provide integration with more libraries

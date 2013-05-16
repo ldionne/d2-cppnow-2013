@@ -10,24 +10,24 @@ the cycle.
 Let's go back to our false positive:
 
     @@@ cpp
-        mutex A, B;
-        thread t1([&] {
-            A.lock();
-            B.lock();
-        });
-        t1.join();
+    mutex A, B;
+    thread t1([&] {
+        A.lock();
+        B.lock();
+    });
+    t1.join();
 
-        thread t2([&] {
-            B.lock();
-            A.lock();
-        });
+    thread t2([&] {
+        B.lock();
+        A.lock();
+    });
 
 
 <!SLIDE graph_example lock_graph_with_segments>
 ## `main` starts in segment 0
 
     @@@ cpp
-        mutex A, B;
+    mutex A, B;
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     label = "segmentation graph";
@@ -49,10 +49,10 @@ Let's go back to our false positive:
 ## `main` starts `t1`; `main` and `t1` get new segments
 
     @@@ cpp
-        mutex A, B;
-        thread t1([&] {
-            // ...
-        });
+    mutex A, B;
+    thread t1([&] {
+        // ...
+    });
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     label = "segmentation graph";
@@ -81,11 +81,11 @@ Let's go back to our false positive:
 ## `t1` acquires `A` and then `B`, both in segment 2
 
     @@@ cpp
-        mutex A, B;
-        thread t1([&] {
-            A.lock();
-            B.lock();
-        });
+    mutex A, B;
+    thread t1([&] {
+        A.lock();
+        B.lock();
+    });
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     label = "segmentation graph";
@@ -115,12 +115,12 @@ Let's go back to our false positive:
 ## `main` joins `t1`; `main` continues in a new segment
 
     @@@ cpp
-        mutex A, B;
-        thread t1([&] {
-            A.lock();
-            B.lock();
-        });
-        t1.join();
+    mutex A, B;
+    thread t1([&] {
+        A.lock();
+        B.lock();
+    });
+    t1.join();
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     label = "segmentation graph";
@@ -151,16 +151,16 @@ Let's go back to our false positive:
 ## `main` starts `t2`; `main` and `t2` get new segments
 
     @@@ cpp
-        mutex A, B;
-        thread t1([&] {
-            A.lock();
-            B.lock();
-        });
-        t1.join();
+    mutex A, B;
+    thread t1([&] {
+        A.lock();
+        B.lock();
+    });
+    t1.join();
 
-        thread t2([&] {
-            // ...
-        });
+    thread t2([&] {
+        // ...
+    });
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     label = "segmentation graph";
@@ -197,17 +197,17 @@ Let's go back to our false positive:
 ## `t2` locks `B` and then `A`, both in segment 4
 
     @@@ cpp
-        mutex A, B;
-        thread t1([&] {
-            A.lock();
-            B.lock();
-        });
-        t1.join();
+    mutex A, B;
+    thread t1([&] {
+        A.lock();
+        B.lock();
+    });
+    t1.join();
 
-        thread t2([&] {
-            B.lock();
-            A.lock();
-        });
+    thread t2([&] {
+        B.lock();
+        A.lock();
+    });
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     label = "segmentation graph";
@@ -245,18 +245,18 @@ Let's go back to our false positive:
 ## `main` joins `t2`; `main` continues in a new segment
 
     @@@ cpp
-        mutex A, B;
-        thread t1([&] {
-            A.lock();
-            B.lock();
-        });
-        t1.join();
+    mutex A, B;
+    thread t1([&] {
+        A.lock();
+        B.lock();
+    });
+    t1.join();
 
-        thread t2([&] {
-            B.lock();
-            A.lock();
-        });
-        t2.join();
+    thread t2([&] {
+        B.lock();
+        A.lock();
+    });
+    t2.join();
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     label = "segmentation graph";

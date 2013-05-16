@@ -10,9 +10,9 @@ intersect, i.e. if they share one or more gatelocks.
 ## Example \#7
 
     @@@ cpp
-        mutex A, B, C, D;
+    mutex A, B, C, D;
 
-        // ...
+    // ...
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, rankdir = LR];
@@ -25,13 +25,13 @@ intersect, i.e. if they share one or more gatelocks.
 `t1` acquires `A` while holding nothing
 
     @@@ cpp
-        mutex A, B, C, D;
-        thread t1([&] {
-            A.lock();
-            // ...
-        });
-
+    mutex A, B, C, D;
+    thread t1([&] {
+        A.lock();
         // ...
+    });
+
+    // ...
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, rankdir = LR];
@@ -47,14 +47,14 @@ in the next slide.
 `t1` acquires `B` while holding `A`; `A` is put in the gatelocks for that edge
 
     @@@ cpp
-        mutex A, B, C, D;
-        thread t1([&] {
-            A.lock();
-            B.lock();
-            // ...
-        });
-
+    mutex A, B, C, D;
+    thread t1([&] {
+        A.lock();
+        B.lock();
         // ...
+    });
+
+    // ...
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, rankdir = LR];
@@ -72,14 +72,14 @@ acquiring `C` is not redundant, because the edge from `A` to `C` needs it.
 the graph are marked with these gatelocks
 
     @@@ cpp
-        mutex A, B, C, D;
-        thread t1([&] {
-            A.lock();
-            B.lock();
-            C.lock();
-        });
+    mutex A, B, C, D;
+    thread t1([&] {
+        A.lock();
+        B.lock();
+        C.lock();
+    });
 
-        // ...
+    // ...
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, splines = curved];
@@ -95,17 +95,17 @@ the graph are marked with these gatelocks
 `t2` acquires `D` while holding nothing
 
     @@@ cpp
-        mutex A, B, C, D;
-        thread t1([&] {
-            A.lock();
-            B.lock();
-            C.lock();
-        });
+    mutex A, B, C, D;
+    thread t1([&] {
+        A.lock();
+        B.lock();
+        C.lock();
+    });
 
-        thread t2([&] {
-            D.lock();
-            // ...
-        });
+    thread t2([&] {
+        D.lock();
+        // ...
+    });
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, splines = curved];
@@ -120,18 +120,18 @@ the graph are marked with these gatelocks
 `t2` acquires `A` while holding `D`
 
     @@@ cpp
-        mutex A, B, C, D;
-        thread t1([&] {
-            A.lock();
-            B.lock();
-            C.lock();
-        });
+    mutex A, B, C, D;
+    thread t1([&] {
+        A.lock();
+        B.lock();
+        C.lock();
+    });
 
-        thread t2([&] {
-            D.lock();
-            A.lock();
-            // ...
-        });
+    thread t2([&] {
+        D.lock();
+        A.lock();
+        // ...
+    });
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, splines = curved];
@@ -147,18 +147,18 @@ the graph are marked with these gatelocks
 `t2` acquires `B` while holding `D` and `A`
 
     @@@ cpp
-        mutex A, B, C, D;
-        thread t1([&] {
-            A.lock();
-            B.lock();
-            C.lock();
-        });
+    mutex A, B, C, D;
+    thread t1([&] {
+        A.lock();
+        B.lock();
+        C.lock();
+    });
 
-        thread t2([&] {
-            D.lock();
-            A.lock();
-            B.lock();
-        });
+    thread t2([&] {
+        D.lock();
+        A.lock();
+        B.lock();
+    });
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, splines = curved];
@@ -192,18 +192,18 @@ gatelocks.
 ## However, consider this situation, where `t1` and `t2` will never run in parallel:
 
     @@@ cpp
-        mutex A, B;
-        thread t1([&] {
-            A.lock();
-            B.lock();
-        });
-        t1.join();
+    mutex A, B;
+    thread t1([&] {
+        A.lock();
+        B.lock();
+    });
+    t1.join();
 
-        thread t2([&] {
-            B.lock();
-            A.lock();
-        });
-        t2.join();
+    thread t2([&] {
+        B.lock();
+        A.lock();
+    });
+    t2.join();
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, rankdir = LR];

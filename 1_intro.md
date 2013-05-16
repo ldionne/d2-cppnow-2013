@@ -2,14 +2,21 @@
 # A system for resource deadlock prevention
 ## ~~~CONFIG:author~~~, ~~~CONFIG:venue~~~
 
+<!SLIDE>
+# About me
+
+I am a math student and programming enthusiast constantly seeking for
+improvement.
+
+## github.com/ldionne
 
 <!SLIDE>
 # Overview
 
-* The target: lock order inconsistencies
-* Existing solutions
-* `d2`: a library-based approach
+1. The target: lock order inconsistencies
+2. Existing solutions
+3. `d2`: a library-based approach
     * Design and usage
     * Algorithm
     * Roadmap
-* Towards `dyno`: a DSEL for dynamic analysis
+4. Towards `dyno`: a dynamic analysis library

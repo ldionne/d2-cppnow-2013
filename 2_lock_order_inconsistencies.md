@@ -2,41 +2,41 @@
 # Lock order inconsistencies
 
 
-<!SLIDE>
+<!SLIDE centered-code>
 # Example \#1
 
     @@@ cpp
-        mutex A, B;
-        thread t1([&] {
-            scoped_lock a(A);
-            scoped_lock b(B);
-        });
+    mutex A, B;
+    thread t1([&] {
+        scoped_lock a(A);
+        scoped_lock b(B);
+    });
 
-        thread t2([&] {
-            scoped_lock b(B);
-            scoped_lock a(A);
-        });
+    thread t2([&] {
+        scoped_lock b(B);
+        scoped_lock a(A);
+    });
 
 
-<!SLIDE>
+<!SLIDE centered-code>
 # Example \#2
 
     @@@ cpp
-        mutex A, B, C;
-        thread t1([&] {
-            scoped_lock a(A);
-            scoped_lock b(B);
-        });
+    mutex A, B, C;
+    thread t1([&] {
+        scoped_lock a(A);
+        scoped_lock b(B);
+    });
 
-        thread t2([&] {
-            scoped_lock b(B);
-            scoped_lock c(C);
-        });
+    thread t2([&] {
+        scoped_lock b(B);
+        scoped_lock c(C);
+    });
 
-        thread t3([&] {
-            scoped_lock c(C);
-            scoped_lock a(A);
-        });
+    thread t3([&] {
+        scoped_lock c(C);
+        scoped_lock a(A);
+    });
 
 
 <!SLIDE>

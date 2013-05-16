@@ -15,9 +15,9 @@ We will ignore cycles containing two edges labelled with the same thread.
 No labels, no edges, like the basic graph.
 
     @@@ cpp
-        mutex A, B;
+    mutex A, B;
 
-        // ...
+    // ...
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent];
@@ -30,13 +30,13 @@ No labels, no edges, like the basic graph.
 When an edge is added, we label it with the thread that caused its addition.
 
     @@@ cpp
-        mutex A, B;
-        thread t1([&] {
-            A.lock();
-            B.lock();
-        });
+    mutex A, B;
+    thread t1([&] {
+        A.lock();
+        B.lock();
+    });
 
-        // ...
+    // ...
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, rankdir = LR];
@@ -50,16 +50,16 @@ We add a parallel edge if the label on it is different from that of existing
 edges.
 
     @@@ cpp
-        mutex A, B;
-        thread t1([&] {
-            A.lock();
-            B.lock();
-        });
+    mutex A, B;
+    thread t1([&] {
+        A.lock();
+        B.lock();
+    });
 
-        thread t2([&] {
-            A.lock();
-            B.lock();
-        });
+    thread t2([&] {
+        A.lock();
+        B.lock();
+    });
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, rankdir = LR];
@@ -73,16 +73,16 @@ Consider the previous graph with a false positive. We now ignore the single
 threaded cycle:
 
     @@@ cpp
-        mutex A, B;
-        thread t1([&] {
-            A.lock();
-                B.lock();
-                B.unlock();
-            A.unlock();
-
+    mutex A, B;
+    thread t1([&] {
+        A.lock();
             B.lock();
-            A.lock();
-        });
+            B.unlock();
+        A.unlock();
+
+        B.lock();
+        A.lock();
+    });
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, rankdir = LR];
@@ -99,26 +99,26 @@ because t2 appears twice in the cycle.
 And cycles still represent potential deadlocks.
 
     @@@ cpp
-        mutex A, B, C;
-        thread t1([&] {
-            A.lock();
-            B.lock();
-        });
+    mutex A, B, C;
+    thread t1([&] {
+        A.lock();
+        B.lock();
+    });
 
-        thread t2([&] {
-            B.lock();
-                C.lock();
-                C.unlock();
-            B.unlock();
-
+    thread t2([&] {
+        B.lock();
             C.lock();
-            A.lock();
-        });
+            C.unlock();
+        B.unlock();
 
-        thread t3([&] {
-            C.lock();
-            A.lock();
-        });
+        C.lock();
+        A.lock();
+    });
+
+    thread t3([&] {
+        C.lock();
+        A.lock();
+    });
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent, rankdir = LR];
@@ -136,19 +136,19 @@ in order to enter the dangerous section of the code.
 However, consider this situation. Both threads must be holding `G`, which
 is impossible:
 
-        @@@ cpp
-            mutex A, B, G;
-            thread t1([&] {
-                G.lock();
-                A.lock();
-                B.lock();
-            });
+    @@@ cpp
+    mutex A, B, G;
+    thread t1([&] {
+        G.lock();
+        A.lock();
+        B.lock();
+    });
 
-            thread t2([&] {
-                G.lock();
-                B.lock();
-                A.lock();
-            });
+    thread t2([&] {
+        G.lock();
+        B.lock();
+        A.lock();
+    });
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent];

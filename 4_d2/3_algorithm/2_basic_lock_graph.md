@@ -5,7 +5,8 @@ created because we did not lock anything.
 ## Example \#1
 
     @@@ cpp
-        mutex A, B;
+    mutex A, B;
+
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent];
     A; B;
@@ -17,8 +18,8 @@ created because we did not lock anything.
 No edge is created; the main thread does not hold anything when it acquires `A`.
 
     @@@ cpp
-        mutex A, B;
-        A.lock();
+    mutex A, B;
+    A.lock();
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent];
@@ -31,9 +32,9 @@ No edge is created; the main thread does not hold anything when it acquires `A`.
 The main thread holds `A` when it acquires `B`; we add an edge from `A` to `B`.
 
     @@@ cpp
-        mutex A, B;
-        A.lock();
-            B.lock();
+    mutex A, B;
+    A.lock();
+        B.lock();
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent];
@@ -46,11 +47,11 @@ The main thread holds `A` when it acquires `B`; we add an edge from `A` to `B`.
 The graph is not modified on releases.
 
     @@@ cpp
-        mutex A, B;
-        A.lock();
-            B.lock();
-            B.unlock();
-        A.unlock();
+    mutex A, B;
+    A.lock();
+        B.lock();
+        B.unlock();
+    A.unlock();
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent];
@@ -66,14 +67,14 @@ it redundantly if a thread locks B again while holding A.
 We don't add redundant edges.
 
     @@@ cpp
-        mutex A, B;
-        A.lock();
-            B.lock();
-            B.unlock();
-        A.unlock();
-
-        A.lock();
+    mutex A, B;
+    A.lock();
         B.lock();
+        B.unlock();
+    A.unlock();
+
+    A.lock();
+    B.lock();
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent];
@@ -85,9 +86,9 @@ We don't add redundant edges.
 ## Example \#2
 
     @@@ cpp
-        mutex A, B, C, D;
-        A.lock();
-        B.lock();
+    mutex A, B, C, D;
+    A.lock();
+    B.lock();
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent];
@@ -103,10 +104,10 @@ We're really computing the transitive closure of the "is held by a thread
 when acquiring X" relation.
 
     @@@ cpp
-        mutex A, B, C, D;
-        A.lock();
-        B.lock();
-        C.lock();
+    mutex A, B, C, D;
+    A.lock();
+    B.lock();
+    C.lock();
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent];
@@ -124,11 +125,11 @@ We're really computing the transitive closure of the "is held by a thread
 when acquiring X" relation.
 
     @@@ cpp
-        mutex A, B, C, D;
-        A.lock();
-        B.lock();
-        C.lock();
-        D.lock();
+    mutex A, B, C, D;
+    A.lock();
+    B.lock();
+    C.lock();
+    D.lock();
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent];
@@ -188,15 +189,15 @@ some order and then acquired in a different order.
 ## Example \# 4: Another potential deadlock
 
     @@@ cpp
-        mutex A, B, C, D;
-        thread t1([&]{
-            A.lock();
-            B.lock();
-            C.lock();
-            D.lock();
-        });
+    mutex A, B, C, D;
+    thread t1([&]{
+        A.lock();
+        B.lock();
+        C.lock();
+        D.lock();
+    });
 
-        // ...
+    // ...
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent];
@@ -213,18 +214,18 @@ some order and then acquired in a different order.
 ## Example \#4: Another potential deadlock
 
     @@@ cpp
-        mutex A, B, C, D;
-        thread t1([&]{
-            A.lock();
-            B.lock();
-            C.lock();
-            D.lock();
-        });
+    mutex A, B, C, D;
+    thread t1([&]{
+        A.lock();
+        B.lock();
+        C.lock();
+        D.lock();
+    });
 
-        thread t2([&]{
-            D.lock();
-            B.lock();
-        });
+    thread t2([&]{
+        D.lock();
+        B.lock();
+    });
 
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent];
@@ -242,21 +243,22 @@ some order and then acquired in a different order.
 ## Example \#5: It works for an arbitrary number of threads
 
     @@@ cpp
-        mutex A, B, C;
-        thread t1([&] {
-            A.lock();
-            B.lock();
-        });
+    mutex A, B, C;
+    thread t1([&] {
+        A.lock();
+        B.lock();
+    });
 
-        thread t2([&] {
-            B.lock();
-            C.lock();
-        });
+    thread t2([&] {
+        B.lock();
+        C.lock();
+    });
 
-        thread t3([&] {
-            C.lock();
-            A.lock();
-        });
+    thread t3([&] {
+        C.lock();
+        A.lock();
+    });
+
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent];
     A->B;
@@ -281,18 +283,19 @@ taken (and we're doing dynamic analysis).
 ## However, the algorithm can report false positives. Consider:
 
     @@@ cpp
-        mutex A, B;
-        thread t1([&] {
-            A.lock();
-                B.lock();
-                B.unlock();
-            A.unlock();
-
+    mutex A, B;
+    thread t1([&] {
+        A.lock();
             B.lock();
-                A.lock();
-                A.unlock();
             B.unlock();
-        });
+        A.unlock();
+
+        B.lock();
+            A.lock();
+            A.unlock();
+        B.unlock();
+    });
+
 ![](https://chart.googleapis.com/chart?cht=gv&chl=digraph {
     graph [bgcolor = transparent];
     A->B;
